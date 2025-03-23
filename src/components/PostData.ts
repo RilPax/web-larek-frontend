@@ -1,4 +1,6 @@
 import { postData } from '../types/types'
+import { PostDataType } from '../types/types'
+
 
 export default class PostData {
     postData: postData
@@ -18,7 +20,7 @@ export default class PostData {
         this.postData.payment = payment
     }
 
-    setAdress(adress: string) {
+    setAddress(adress: string) {
         this.postData.address = adress
     }
 
@@ -48,7 +50,26 @@ export default class PostData {
             items: [],
         }
     }
+
+    checkData(key: keyof PostDataType): boolean {
+        const value = this.postData[key];
+    
+        if (value === '' || value === 0 || (Array.isArray(value) && value.length === 0)) {
+            return false;
+        }
+    
+        return true;
+    }
+
     get data(): postData {
         return this.postData
+    }
+
+    setError(field: HTMLElement) {
+        field.textContent = 'Пожалуйста, заполните все данные'
+    }
+
+    hideError(field: HTMLElement) {
+        field.textContent = ''
     }
 }

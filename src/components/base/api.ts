@@ -38,7 +38,6 @@ export class Api {
             method,
             body: JSON.stringify(data)
         }).then(async (response) => {
-            console.log("Статус запроса:", response.status);
             return this.handleResponse<T>(response);
         });
     }

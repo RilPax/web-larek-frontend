@@ -12,11 +12,6 @@ interface Irequest<T> {
     items: T[];
 }
 
-export default interface IDataCard {
-    title: string;
-    if: string;
-}
-
 interface IpostData<T> {
     payment: string;
     email: string;
@@ -26,8 +21,17 @@ interface IpostData<T> {
     items: T[];
 }
 
+interface PostDataType {
+    payment: string;
+    email: string;
+    phone: string;
+    address: string;
+    total: number;
+    items: string[];
+}
+
 type CustomRequest = Irequest<Icard>;
 type postData = IpostData<string>;
 
 
-export { CustomRequest, postData }
+export { CustomRequest, postData, PostDataType }

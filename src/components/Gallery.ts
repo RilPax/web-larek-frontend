@@ -1,5 +1,3 @@
-import Cards from "./Cards"
-import Modal from "./Modal"
 
 export default class Gallery {
 
@@ -9,18 +7,12 @@ export default class Gallery {
         this.gallery = gallery
     }
 
-    pushCards(cards: Cards, modal: Modal) {
-        cards.galleryCardsElements.forEach(card => {
-            this.gallery.append(card)
-            card.addEventListener('click', () => {
-                cards.modalCardsElements.find(modalCard => {
-                    if(modalCard.querySelector('.card__title').textContent === card.querySelector('.card__title').textContent) {
-                        modal.openModal(modalCard)
-                        
-                    }
-                })
-            })
-        })
+    pushCard(card: HTMLElement) { 
+        this.gallery.append(card)
+    }
+
+    getElementText(element: Element, className: string) {
+        return element.querySelector(className).textContent
     }
 
 }
