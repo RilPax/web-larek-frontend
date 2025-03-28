@@ -5,7 +5,6 @@ export default class HeaderBasketButton {
         this.basketButton = element
     }
 
-
     updateCounter(count: number) {
         this.basketButton.querySelector('.header__basket-counter').textContent = String(count);
     }

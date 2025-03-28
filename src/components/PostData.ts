@@ -32,8 +32,8 @@ export default class PostData {
         this.postData.items = items
     }
 
-    setTotal(total: string) {
-        this.postData.total = Number(total)
+    setTotal(total: number) {
+        this.postData.total = total
     }
 
     setPhone(phone: string) {
@@ -54,11 +54,13 @@ export default class PostData {
     checkData(key: keyof PostDataType): boolean {
         const value = this.postData[key];
     
-        if (value === '' || value === 0 || (Array.isArray(value) && value.length === 0)) {
+        if (value === undefined || value === null || value === '' || value === 0 || (Array.isArray(value) && value.length === 0)) {
             return false;
         }
-    
-        return true;
+        else {
+            return true;
+        }
+        
     }
 
     get data(): postData {
