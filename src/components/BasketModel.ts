@@ -1,27 +1,16 @@
 import Icard from "../types/types"
 
 export default class BasketModel {
-    basketList: HTMLElement[] = []
+    basketList: Icard[] = []
     totalPrice: number = 0
     cardsId: string[] = []
 
-    constructor() {
-        this.basketList = []
+    setElement(card: Icard) {
+        this.basketList.push(card)
     }
 
-    setElement(element: HTMLElement, card: Icard) {
-        this.basketList.push(element)
-        this.totalPrice += Number(element.querySelector('.card__price').textContent.replace(' синапсов', ''))
-        this.cardsId.push(card.id)
-    }
-
-    remove(softCard: HTMLElement) {
-        this.basketList = this.basketList.filter(element => element !== softCard);
-        this.totalPrice -= Number(softCard.querySelector('.card__price').textContent.replace(' синапсов', ''))
-    }
-
-    getElementPrice(element: HTMLElement) {
-        return element.querySelector('.card__price').textContent
+    removeItem(card: Icard) {
+        this.basketList = this.basketList.filter(item => item !== card)
     }
 
     get productsCount() {
@@ -31,11 +20,10 @@ export default class BasketModel {
     setTotal() {
         let price = 0
 
-        this.basketList.forEach(element => {
-            const elementPrice = element.querySelector('.card__price').textContent
-            const findPrice = Number(elementPrice.replace(' синапсов', ''))
+        this.basketList.forEach(card => {
+            const elementPrice = card.price
 
-            price += findPrice
+            price += elementPrice
         })
 
         return price

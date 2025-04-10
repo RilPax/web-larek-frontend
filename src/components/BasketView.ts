@@ -1,56 +1,33 @@
+import Icard from "../types/types"
 import { EventEmitter } from "./base/events"
-import BasketModel from "./BasketModel"
-import { CardModel } from "./CardModel"
-import Modal from "./Modal"
-import PostData from "./PostData"
 
-export default class BasketView {
+export default class basketView {
     basket: HTMLElement
-    basketContainer: HTMLElement
-    basketButton: HTMLButtonElement
-    basketPrice: HTMLElement
-    events: EventEmitter
+    basketBtn: HTMLButtonElement
+    basketList: HTMLElement
+    basketTotal: HTMLElement
 
-    constructor(basketTemplate: HTMLTemplateElement, event: EventEmitter) {
-        const basket: HTMLElement = basketTemplate.content.querySelector('.basket')
-
-        this.basket = basket
-        this.basketContainer = this.basket.querySelector('.basket__list')
-        this.basketButton = this.basket.querySelector('.button')
-        this.basketPrice = this.basket.querySelector('.basket__price')
-        this.events = event
-
-        this.events.on('basket:render', (basketData: BasketModel) => {
-            if(basketData.basketList.length === 0) {
-                this.basketButton.disabled = true
-            }
-            else{
-                this.basketButton.disabled = false
-            }
-
-            this.basketContainer.innerHTML = ''
-            for(let i = 0; i < basketData.basketList.length; i++) {
-                const basketElement = basketData.basketList[i]
-                basketElement.querySelector('.basket__item-index').textContent = String(i + 1)
-            }
-            basketData.basketList.forEach(element => {
-               this.addProduct(element, basketData) 
-            });
-
-            this.basketPrice.textContent = String(basketData.setTotal() + ' синапсов')
-        })
-
-        this.events.on('basket:submit', (event: {form: HTMLFormElement, postData: PostData, modal: Modal, basketData: BasketModel, cardModel: CardModel}) => {
-            event.modal.openModal(event.form)
-            event.postData.setItems(event.basketData.cardsId)
-            event.postData.setTotal(event.basketData.totalPrice)
-        }) 
+    constructor(template: HTMLTemplateElement) {
+        this.basket = template.content.querySelector('.basket').cloneNode(true) as HTMLElement
+        this.basketBtn = this.basket.querySelector('.button') as HTMLButtonElement
+        this.basketList = this.basket.querySelector('.basket__list') as HTMLElement
+        this.basketTotal = this.basket.querySelector('.basket__price') as HTMLElement
     }
 
-
-
-    addProduct(element: HTMLElement, basketData: BasketModel) {
-        basketData.setTotal()
-        this.basketContainer.append(element)
+    render(cards: Icard[], createCard: ( card: Icard ) => HTMLElement) {
+        this.basketList.innerHTML = ''
+        let total = 0
+        cards.forEach(card => {
+            total = total + card.price
+            const cardElement = createCard(card)
+            this.basketList.append(cardElement)
+        })
+        this.basketTotal.textContent = `${total} синапсов`
+        if(total !== 0) {
+            this.basketBtn.disabled = false
+        }
+        else {
+            this.basketBtn.disabled = true
+        }
     }
 }

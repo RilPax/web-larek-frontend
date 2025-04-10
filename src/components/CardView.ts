@@ -1,12 +1,7 @@
-import Icard from "../types/types";
-import { CDN_URL } from "../utils/constants";
-import { EventEmitter } from "./base/events";
-import BasketData from "./BasketModel";
-import BasketView from "./BasketView";
-import Contacts from "./Contacts";
-import HeaderBasketButton from "./HeaderBasketButton";
-import Modal from "./Modal";
-import Order from "./Order";
+import Icard from "../types/types"
+import { CDN_URL } from "../utils/constants"
+import { EventEmitter } from "./base/events"
+
 
 export default class CardView {
 
@@ -26,16 +21,6 @@ export default class CardView {
         this.modalCardTemplate = modalCardTemplate
         this.softCardTemplate = softCardTemplate
         this.events = event
-
-        this.events.on('galleryCard:click', (event: {modal: Modal, card: HTMLElement}) => {
-            event.modal.openModal(event.card)
-        })
-        this.events.on('modalCard:click', (event: {card: Icard, modal: Modal, basketData: BasketData, headerBasketButton: HeaderBasketButton, softCard: HTMLElement, order: Order, contacts: Contacts}) => {
-            event.modal.closeModal()
-            event.basketData.setElement(event.softCard, event.card)
-            event.headerBasketButton.updateCounter(event.basketData.productsCount)
-            
-        })
     }
 
     setCardTitle(card: HTMLElement, title: string) {
@@ -75,6 +60,10 @@ export default class CardView {
         this.setCardTitle(galleryCard, card.title)
         this.setCardImage(galleryCard, card.image)
 
+        galleryCard.addEventListener('click', () => {
+            this.events.emit(`${card.title}gallery:click`)
+        })
+
         return galleryCard
     }
 
@@ -91,6 +80,10 @@ export default class CardView {
             modalButton.disabled = true
         }
 
+        modalButton.addEventListener('click', () => {
+            this.events.emit(`${card.title}modal:click`)
+        })
+
         return modalCard
     }
 
@@ -99,9 +92,23 @@ export default class CardView {
         this.setCardPrice(softCard, card.price)
         this.setCardTitle(softCard, card.title)
 
-
+        softCard.addEventListener('click', (evt) => {
+            const target = evt.target
+            const deleteBtn = softCard.querySelector('.basket__item-delete') as HTMLButtonElement
+            if(target === deleteBtn) {
+                this.events.emit(`${card.title}soft:click`)
+            }
+        })
 
         return softCard
+    }
+
+    renderGallery(cards: Icard[]) {
+        const gallery: HTMLButtonElement[] = []
+        cards.forEach(card => {
+            gallery.push(this.renderGalleryCard(card))
+        })
+        return gallery
     }
 
 }

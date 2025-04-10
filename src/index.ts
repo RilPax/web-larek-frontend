@@ -1,121 +1,55 @@
 import './scss/styles.scss';
-import { API_URL } from './utils/constants';
 
-import { Api } from './components/base/api';
-import { CardModel } from './components/CardModel';
-import CardView from './components/CardView';
-import Gallery from './components/Gallery';
-import { CustomRequest } from './types/types';
-import { EventEmitter } from './components/base/events';
+import CardPresenter from "./components/CardPresenter";
+import { Api } from "./components/base/api";
+import { EventEmitter } from "./components/base/events";
+import CardView from "./components/CardView";
+import Gallery from "./components/Gallery";
+import { API_URL } from "./utils/constants";
 import Modal from './components/Modal';
-import BasketData from './components/BasketModel';
 import HeaderBasketButton from './components/HeaderBasketButton';
+import BasketModel from './components/BasketModel';
 import BasketView from './components/BasketView';
-import Order from './components/Order';
 import PostData from './components/PostData';
+import Order from './components/Order';
 import Contacts from './components/Contacts';
 import Success from './components/Success';
+import OrderPresenter from './components/OrderPresenter';
+import ContactsPresenter from './components/ContactsPresenter';
+import AppPresenter from './components/AppPresenter';
+import BasketPresenter from './components/BasketPresenter';
 
 const galleryCardTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement
 const modalCardTemplate = document.querySelector('#card-preview') as HTMLTemplateElement
 const softCardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement
-const API_URI = '/product'
+const galleryElement = document.querySelector('.gallery') as HTMLElement
+const headerBasketButtonTemplate = document.querySelector('.header__basket') as HTMLButtonElement
+const basketTemplate = document.querySelector('#basket') as HTMLTemplateElement
+const ordertemplate = document.querySelector('#order') as HTMLTemplateElement
+const contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement
+const succsessTemplate = document.querySelector('#success') as HTMLTemplateElement
 
 const api = new Api(API_URL)
-
-async function name() {
-    const data = await api.get<CustomRequest>(API_URI)
-    return data.items
-}
-
-const headerBasketButton = new HeaderBasketButton(document.querySelector('.header__basket'))
 const event = new EventEmitter()
-const basketData = new BasketData()
-const basketView = new BasketView(document.querySelector('#basket'), event)
-const postData = new PostData()
-const cardModel = new CardModel(name())
 const cardView = new CardView(galleryCardTemplate, modalCardTemplate, softCardTemplate, event)
-const gallery = new Gallery(document.querySelector('.gallery'))
-const order = new Order(document.querySelector('#order'), event, postData)
-const contacts = new Contacts(document.querySelector('#contacts'), event, postData)
-const success = new Success(document.querySelector('#success'))
-const modal = new Modal(document.querySelector('.modal'), postData, order, contacts)
+const gallery = new Gallery(galleryElement)
+const modal = new Modal()
+const headerBasketButton = new HeaderBasketButton(headerBasketButtonTemplate)
+const basketModel = new BasketModel()
+const basketView = new BasketView(basketTemplate)
+const postData = new PostData()
+const order = new Order(ordertemplate, event)
+const contacts = new Contacts(contactsTemplate, event)
+const success = new Success(succsessTemplate)
 
-function clearSite(modalCardButtonArray: HTMLButtonElement[]) {
-    postData.clearData()
-    basketData.clear()
-    headerBasketButton.updateCounter(basketData.productsCount)
-    modalCardButtonArray.forEach(button => {
-        button.disabled = false
-    })
-}
-
-async function siteInit() {
-    await cardModel.fetchRequest()
-    const modalCardButtonArray: HTMLButtonElement[] = []
-
-    cardModel.cards.forEach(card => {
-        const softCard = cardView.renderSoftCard(card)
-        const modalCard = cardView.renderModalCard(card)
-        const modalButton = modalCard.querySelector('.button') as HTMLButtonElement
-        modalCardButtonArray.push(modalButton)
-        const galleryCard = cardView.renderGalleryCard(card)
+const orderPresenter = new OrderPresenter(order, event, postData)
+const contactsPresenter = new ContactsPresenter(contacts, event, postData, api, modal, success, basketModel, headerBasketButton)
+const cardPresenter = new CardPresenter(api, cardView, gallery, event, modal, basketModel, basketView, headerBasketButton, order, contacts)
+const appPresenter = new AppPresenter(event, modal, order, contacts, postData, success)
+const basketPresenter = new BasketPresenter(basketModel, basketView, headerBasketButton, event, cardView, modal, postData, order.form)
 
 
-        galleryCard.addEventListener('click', () => {
-            cardView.events.emit('galleryCard:click', {modal: modal, card: modalCard} )
-        })
-
-        modalCard.addEventListener('click', (evt) => {
-            const target = evt.target
-
-            if(target === modalButton) {
-                cardView.events.emit('modalCard:click', ( {card, modal, basketData, headerBasketButton, softCard} ))
-                modalButton.disabled = true
-            }
-        })
-
-        softCard.addEventListener('click', (evt) => {
-            const target = evt.target
-            if(target === softCard.querySelector('.card__button')) {
-                basketData.remove(softCard)
-                headerBasketButton.updateCounter(basketData.productsCount)
-                basketView.events.emit('basket:render', basketData)
-                modalButton.disabled = false
-            }
-        })
-
-        gallery.pushCard(galleryCard)
-    })
-
-    contacts.form.addEventListener('submit', (evt) => {
-        evt.preventDefault()
-        contacts.events.emit('contacts:submit', ( {postData, api, modalCardButtonArray, modal, success, clearSite} ))
-    })
-
-    success.button.addEventListener('click', () => {
-        modal.closeModal()
-    })
-}
-
-headerBasketButton.basketButton.addEventListener('click', () => {
-    modal.openModal(basketView.basket)
-    basketView.events.emit('basket:render', basketData)
-})
-
-basketView.basketButton.addEventListener('click', () => {
-    basketView.events.emit('basket:submit', ( {form: order.form, postData: postData, modal: modal, basketData: basketData, cardModel: cardModel} ))
-})
-
-order.altButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        order.events.emit('activeButton:toggle', button)
-    })
-})
-
-order.form.addEventListener('submit', (evt) => {
-    evt.preventDefault()
-    order.events.emit('order:submit', ( {form: contacts.form, modal} ))
-})
-
-siteInit()
+orderPresenter.formInit({method: modal.open.bind(modal), form: contacts.form})
+contactsPresenter.formInit()
+appPresenter.appInit()
+basketPresenter.basketInit()

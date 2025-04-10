@@ -1,4 +1,4 @@
-import { postData } from '../types/types'
+import Icard, { postData } from '../types/types'
 import { PostDataType } from '../types/types'
 
 
@@ -28,11 +28,18 @@ export default class PostData {
         this.postData.email = email
     }
 
-    setItems(items: string[]) {
-        this.postData.items = items
+    setItems(cards: Icard[]) {
+        this.postData.items = []
+        cards.forEach(card => {
+            this.postData.items.push(card.id)
+        })
     }
 
-    setTotal(total: number) {
+    setTotal(cards: Icard[]) {
+        let total = 0
+        cards.forEach(card => {
+            total += card.price
+        })
         this.postData.total = total
     }
 
@@ -63,13 +70,6 @@ export default class PostData {
         
     }
 
-    get data(): postData {
-        return this.postData
-    }
-
-    setError(field: HTMLElement) {
-        field.textContent = 'Пожалуйста, заполните все данные'
-    }
 
     hideError(field: HTMLElement) {
         field.textContent = ''

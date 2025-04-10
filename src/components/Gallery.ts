@@ -1,4 +1,3 @@
-
 export default class Gallery {
 
     gallery: HTMLElement
@@ -7,8 +6,10 @@ export default class Gallery {
         this.gallery = gallery
     }
 
-    pushCard(card: HTMLElement) { 
-        this.gallery.append(card)
+    push(cards: HTMLButtonElement[]) { 
+        cards.forEach(card => {
+            this.gallery.append(card)
+        })
     }
 
     getElementText(element: Element, className: string) {
