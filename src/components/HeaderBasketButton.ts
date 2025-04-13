@@ -1,5 +1,3 @@
-import { EventEmitter } from "./base/events";
-
 export default class HeaderBasketButton {
     basketButton: HTMLButtonElement
 
